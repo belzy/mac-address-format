@@ -14,13 +14,21 @@ Purpose: This application allows a user to enter a 48 bit MAC address string in 
   <li>April 23, 2017</li>
   <li>Added feature where user can enter any of the MAC Address formats as input.</li>
   <li>Optimized runtime by refactoring the input validation and formatting processes.</li>
- </ul>
- <hr />
+</ul>
+<hr />
+<ul>
+  <li>Version 1.2</li>
+  <li>April 29, 2017</li>
+  <li>Fixed a bug where if user enters a MAC address with white space, the invalid mac address error would be displayed.</li>
+  <li>Fixed a bug where if user enters the format (123456-789abc) then adds a character (123456789-abcd)
+      the application does not crash but displays the invalid mac address error message.
+  </li>
+</ul>
+<hr />
+ 
 <h3>BUGS:</h3>
 <ul>
-  <li>After entering the format (123456-789abc) then adding a character (123456789-abcd)<br />
-      the application does not crash but seems to be loading and always displays the invalidMacAddress
-      error message.</li>
+  <li></li>
 </ul>
 <hr />
 <h4>ACCEPTED MAC ADDRESS FORMATS:</h4>
