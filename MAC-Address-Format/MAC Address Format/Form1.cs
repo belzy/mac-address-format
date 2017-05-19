@@ -1,7 +1,7 @@
 ﻿// Application Name: MAC Address Format Tool
 // Author: Brandon G. Elzy
 // Date Created: April 11, 2017
-// Date Last Modified: April 23, 2017
+// Date Last Modified: April 29, 2017
 // Purpose: This application allows a user to enter a 48 bit MAC address string in a number of different formats.
 //          When the format button is activated, the string is converted into all available MAC Address formats and
 //          displayed in a text box. The user may copy any of the text from the textbox, but cannot edit the text.
@@ -14,17 +14,18 @@
  *  - Optimized runtime by refactoring the input validation and formatting processes.
  *    
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * 
+ *  - Version 1.2
+ *  - April 29, 2017
+ *  - Fixed a bug where if user enters a MAC address with white space, the invalid mac address error would be displayed.
+ *  - Fixed a bug where if user enters the format (123456-789abc) then adds a character (123456789-abcd)
+ *  - the application does not crash but displays the invalid mac address error message.
  */
 
 // BUGS:
 /*  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
- * - After entering the format (123456-789abc) then adding a character (123456789-abcd)
- * - the application does not crash but seems to be loading and always displays the invalidMacAddress
- * - error message.
+ *
  * 
  *  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
- *  - NOTE: Some documentation is incorrect due to refactoring.
  */
 
 using System;
@@ -64,7 +65,6 @@ namespace MAC_Address_Format
             // Clear the form controls.
             txtMACFormatted.Text = emptyString;
             lblError.Text = emptyString;
-            MAC.Clear();
 
             if (MAC.FormatAddress(txtMACInput.Text))
             {
@@ -78,6 +78,7 @@ namespace MAC_Address_Format
         }
     }
 
+    // MAC Class.
     public class MAC
     {
         // ACCEPTED MAC ADDRESS FORMATS:
@@ -95,7 +96,7 @@ namespace MAC_Address_Format
         private static string[] formattedMacAddresses = new string[6];           // This array will contain the formatted MAC Addresses.
         private static char[] formatCharacters = new char[] { '.', '-', ':' };   // This array contains the acceptable format characters to be used in the validation and fomatting processes.
         private static int[] formatLengths = new int[] {12, 13, 14, 17 };        // This array contains all acceptable lengths of a mac address input string.
-        private static int position = 0;                                         // Represents the position of the character in the string being tested against the format character.
+        private static double position = 0;                                      // Represents the position of the character in the string being tested against the format character.
 
         // Public class functions.
         public static bool FormatAddress(string mac)
@@ -104,10 +105,13 @@ namespace MAC_Address_Format
             // If the string matches one of the formats, it will convert it to the other formats and return true.
             // If the string doesn't match one of the formats, the function will return FALSE.
 
+            // Remove white space from input string.
+            string macAddress = RemoveWhiteSpace(mac);
+
             // If argument 'string mac' format is correct, convert it, format it, and assign it to the formattedMacAddresses array.
-            if (ValidateMacAddress(mac))
+            if (ValidateMacAddress(macAddress))
             {
-                string convertedMacAddress = ConvertMacAddress(mac);        // Converted MAC address to be used in Format functions.
+                string convertedMacAddress = ConvertMacAddress(macAddress);        // Converted MAC address to be used in Format functions.
                 formattedMacAddresses[0] = FormatOne(convertedMacAddress);
                 formattedMacAddresses[1] = FormatTwo(convertedMacAddress);
                 formattedMacAddresses[2] = FormatThree(convertedMacAddress);
@@ -124,20 +128,28 @@ namespace MAC_Address_Format
         {
             return formattedMacAddresses;
         }     // Returns the formattedMacAddresses array.
-        public static void Clear()
-        {   // This function will clear the values from the formattedMacAddresses array.
-            for (int i = 0; i < formattedMacAddresses.Length; i++)
-            {
-                formattedMacAddresses[i] = "";
-            }
-        }
 
         // Private class functions.
+        private static string RemoveWhiteSpace(string mac)
+        {
+            StringBuilder builder = new StringBuilder();
+            foreach(char c in mac)
+            {
+                if (c == ' ')
+                    continue;
+                else
+                    builder.Append(c);
+            }
+            return builder.ToString();
+        }    // Removes white space from MAC address string.
         private static bool ValidateMacAddress(string mac)
         {   // This function takes a 48 bit MAC Address string as an argument.
             // It will check if the string matches one of the acceptable formats.
             // If the string matches one of the formats, the function will return TRUE.
             // If the string doesn't match one of the formats, the function will return FALSE.
+
+            // Reset the position of the character being tested.
+            position = 0;
 
             // Check first format.
             if (mac.Length == formatLengths[0])
@@ -261,6 +273,9 @@ namespace MAC_Address_Format
 
             // Declare variables.
             string convertedMacAddress = "";    // The converted MAC Address string to be returned.
+
+
+
 
             // Convert first format
             if (mac.Length == formatLengths[0])
@@ -413,7 +428,7 @@ namespace MAC_Address_Format
             foreach (var c in mac)
             {
                 builder.Append(c);
-                if ((++position % 6) == 0)
+                if ((++position / 6) == 1)
                 {
                     if (position != 12)
                         builder.Append('-');
